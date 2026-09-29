@@ -2,7 +2,7 @@
 
 **Acquisizione forense automatizzata di attività web, in una VM Windows su VMware Workstation Pro.**
 
-WEBCQUISITION automatizza tutte le parti *meccaniche* di un'acquisizione web e lascia all'operatore
+WEBCQUISITION automatizza tutte le operazioni *meccaniche* di un'acquisizione web e lascia all'operatore
 solo quelle *investigative*: la navigazione e la scelta di cosa documentare.
 
 Per ogni acquisizione, WEBCQUISITION:
@@ -14,7 +14,7 @@ Per ogni acquisizione, WEBCQUISITION:
 - apre **Firefox** su [time.is](https://time.is), con un profilo dedicato al caso;
 - fornisce **screenshot** con hash e metadati (`Ctrl+Alt+S` o pannello), ma lascia ovviamente la possibilità di effettuare screenshot da browser manualmente;
 - una volta terminata l'attività un bottone consente di terminare l'acquisizione e il tool **copia la cartella del caso sull'host** con doppia verifica SHA-256;
-- alla fine (anche solo spegnendo Windows) chiude tutto;
+  - alla fine (anche solo spegnendo Windows) chiude tutto;
 - produce `acquisition.json`, un **report HTML** e un **log eventi con catena di hash**.
 
 ---
