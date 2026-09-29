@@ -1,0 +1,12 @@
+{
+  "listen_host": "192.168.150.10",
+  "listen_port": 8765,
+  "token": "INCOLLARE-QUI-IL-TOKEN-GENERATO-CON-webcquisition-gen-token",
+  "agent_id": "forensic-windows-01",
+  "control_ip": "192.168.150.10",
+  "dumpcap_path": "C:\\Program Files\\Wireshark\\dumpcap.exe",
+  "tshark_path": "C:\\Program Files\\Wireshark\\tshark.exe",
+  "wireshark_path": "C:\\Program Files\\Wireshark\\Wireshark.exe",
+  "firefox_path": "C:\\Program Files\\Mozilla Firefox\\firefox.exe",
+  "log_dir": "C:\\ProgramData\\WEBCQUISITION\\logs"
+}

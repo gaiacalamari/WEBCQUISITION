@@ -1,0 +1,186 @@
+Metadata-Version: 2.4
+Name: webcquisition
+Version: 0.2.5
+Summary: Acquisizione forense automatizzata di attività web in una VM Windows su VMware Workstation Pro
+Author: WEBCQUISITION contributors
+License: Apache-2.0
+Project-URL: Documentation, https://github.com/webcquisition/WEBCQUISITION/tree/main/docs
+Project-URL: Issues, https://github.com/webcquisition/WEBCQUISITION/issues
+Keywords: digital forensics,web acquisition,vmware,pcapng,sslkeylogfile,wireshark,dfir
+Classifier: Development Status :: 3 - Alpha
+Classifier: Intended Audience :: Legal Industry
+Classifier: Intended Audience :: Information Technology
+Classifier: License :: OSI Approved :: Apache Software License
+Classifier: Operating System :: Microsoft :: Windows
+Classifier: Operating System :: POSIX :: Linux
+Classifier: Programming Language :: Python :: 3
+Classifier: Topic :: Security
+Classifier: Topic :: System :: Networking :: Monitoring
+Requires-Python: >=3.10
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: PyYAML>=6.0
+Provides-Extra: dev
+Requires-Dist: pytest>=7.4; extra == "dev"
+Requires-Dist: ruff>=0.4; extra == "dev"
+Dynamic: license-file
+
+# WEBCQUISITION
+
+**Acquisizione forense automatizzata, ripetibile e documentata di attività web in una VM Windows su VMware Workstation Pro.**
+
+WEBCQUISITION automatizza tutte le parti *meccaniche* di un'acquisizione web e lascia all'operatore
+solo quelle *investigative*, cioè la navigazione e la scelta di cosa documentare.
+
+Le parti automatizzate sono:
+- preparazione della VM;
+- ripristino dello snapshot pulito;
+- cattura del traffico;
+- segreti TLS;
+- profilo browser dedicato;
+- screenshot;
+- chiusura;
+- trasferimento;
+- doppia verifica SHA-256;
+- report.
+
+Ogni passo è registrato in un log eventi con catena di hash.
+
+> **Stato: beta (0.2.5).** Il workflow completo è coperto da 180+ test automatici. Includono il
+> provider VMware reale su un simulatore di `vmrun` e l'esecuzione degli script PowerShell del guest
+> con cmdlet simulati. **Non è stato ancora eseguito su un'installazione VMware reale**: prima dell'uso
+> su casi reali eseguire il protocollo di validazione in [docs/TESTING.md](docs/TESTING.md).
+> WEBCQUISITION non sostituisce metodo, verbale e giudizio dell'operatore.
+
+## In tre comandi
+
+```powershell
+# 1. una volta sola: prepara la VM (agent, rete di controllo, snapshot pulito, configurazione)
+webcquisition vmware-setup --vmx "D:\VMs\Forensic Windows\Forensic Windows.vmx" `
+    --guest-user Administrator --operator-user forensic --cases-dir D:\Cases --fix-network
+
+# 2. una volta sola: prova completa (avvia la VM dallo snapshot, verifica l'agent, la spegne)
+webcquisition check-env --live
+
+# 3. per ogni caso (oppure doppio clic su WEBCQUISITION.cmd)
+webcquisition wizard
+```
+
+Dopo il setup non servono file di configurazione da scrivere a mano né opzioni da ricordare.
+
+## Cosa fa `vmware-setup`
+
+Prerequisiti nella VM: Windows 10/11, VMware Tools, Python 3.10+ per tutti gli utenti, Wireshark
+con Npcap, Firefox (installer Mozilla).
+
+1. Verifica che la VM sia spenta e non cifrata, con NIC1 = NAT (acquisizione) e NIC2 = Host-only
+   (controllo). Con `--fix-network` corregge il file `.vmx` dopo averne fatto una copia.
+2. Individua la rete host-only di VMware (VMnet1) e sceglie gli indirizzi.
+3. Genera il token e crea il bundle dell'agent.
+4. Avvia la VM e, tramite VMware Tools:
+   - imposta un IP statico sulla scheda di controllo, senza gateway né DNS;
+   - rinomina le schede `WEBCQ-Acquisizione` / `WEBCQ-Controllo`;
+   - verifica Python, Wireshark, Npcap e Firefox;
+   - installa l'agent (Scheduled Task all'accesso dell'operatore, firewall limitato all'host,
+     privilegi limitati);
+   - rimuove un eventuale SSLKEYLOGFILE globale;
+   - opzionale: accesso automatico, disattivazione di Windows Update.
+5. Riavvia la VM e verifica l'agent end-to-end.
+6. Spegne la VM, crea lo snapshot pulito, scrive la configurazione dell'host, un **rapporto di
+   preparazione** e un log eventi con catena di hash, che documentano la baseline.
+
+## Cosa succede durante un'acquisizione
+
+> L'acquisizione si avvia **dall'host** (`webcquisition wizard` o `WEBCQUISITION.cmd`), non aprendo la
+> VM da VMware Workstation: è l'host che ripristina lo snapshot pulito, avvia la VM e poi coordina
+> cattura, chiusura e copia. Una VM aperta a mano parte senza cattura né cartella del caso.
+
+```
+HOST (Windows/Linux)                        VM Windows (VMware Workstation Pro)
+┌─────────────────────────┐  VMnet1 host-only ┌─────────────────────────────────────────┐
+│ webcquisition           │ ◄──────────────► │ agent (sessione dell'operatore)          │
+│  • vmrun: snapshot, VM  │  HTTP + token     │  • Desktop\<CASO>\                       │
+│  • orchestratore/stati  │  (mai catturata)  │  • dumpcap ─► network/*.pcapng (REPERTO) │
+│  • copia + SHA-256      │                   │  • GUI Wireshark (vista operatore)       │
+│  • report, verify       │                   │  • Firefox su https://time.is,           │
+└─────────────────────────┘                   │    SSLKEYLOGFILE ─► tls/sslkeylog.log    │
+                                  VMnet8 NAT ─►│  • pannello + hotkey screenshot          │
+                                              └─────────────────────────────────────────┘
+```
+
+1. Controllo dell'identità della VM (UUID), delle schede di rete e dello snapshot.
+2. Ripristino dello snapshot pulito e avvio della VM.
+3. Attesa di VMware Tools e dell'agent; misura dell'offset dell'orologio.
+4. Creazione di `Desktop\<CASO>` e del key log TLS.
+5. **Wireshark** parte e cattura sulla scheda di acquisizione `WEBCQ-Acquisizione`. La cattura è
+   **verificata**: processo, file, interfaccia corretta, pacchetti in crescita.
+6. **Firefox** si apre su **time.is**, con profilo dedicato. Si apre anche il pannello per gli
+   screenshot (`Ctrl+Alt+S`).
+7. L'operatore naviga e documenta.
+8. **Fine**, in uno di tre modi:
+   - **spegnere Windows** (Start → Arresta). Lo spegnimento viene trattenuto finché la cartella del
+     caso non è copiata e verificata sull'host, poi la VM si spegne da sola;
+   - "Fine acquisizione" nel pannello;
+   - `FINE` nella console dell'host.
+9. Chiusura di Firefox e arresto pulito della cattura, sigillo SHA-256 nel guest.
+10. Copia di `Desktop\<CASO>` in `<cartella casi>\<CASO>\acquired\` e seconda verifica da disco.
+11. Spegnimento della VM.
+12. Creazione di `acquisition.json`, del report HTML e di `package-seal.json`.
+
+**Se la VM viene spenta di colpo** (Power Off, chiusura della finestra di Workstation, "Arresta
+comunque"), l'host la riaccende **senza** ripristinare lo snapshot. Poi recupera e verifica la
+cartella del caso e spegne di nuovo la VM. L'esito è `INCOMPLETE`, perché cattura e browser sono
+stati interrotti bruscamente, ma il materiale è sull'host. Una VM sospesa viene ripresa e chiusa
+normalmente.
+
+L'esito finale è `COMPLETED`, `INCOMPLETE` (pacchetto integro ma con errori documentati) oppure `FAILED`.
+
+## Provare senza VMware
+
+```bash
+pip install -e ".[dev]"
+webcquisition -c examples/dry-run.yaml acquire CASE-DEMO-001 --output ./out/CASE-DEMO-001 --dry-run --auto-stop 3
+webcquisition verify --output ./out/CASE-DEMO-001
+```
+
+## Comandi
+
+| Comando | Scopo |
+|---|---|
+| `vmware-setup` | preparazione automatica della VM (una tantum, o dopo ogni aggiornamento della VM) |
+| `check-env [--live]` | verifica configurazione, VM, snapshot, NIC, token; con `--live` anche l'agent a VM accesa |
+| `wizard` | procedura guidata: ID caso, operatore, conferma, acquisizione |
+| `acquire ID --operator NOME` | come `wizard`, senza domande |
+| `create-case`, `run`, `start` / `status` / `stop` | passi separati |
+| `verify --output CASO` | verifica offline di un pacchetto (nessuna scrittura) |
+| `gen-token` | token per un'installazione manuale dell'agent |
+
+Codici di uscita: `0` COMPLETED, `2` INCOMPLETE, `3` FAILED, `64` errore d'uso/configurazione.
+
+## Documentazione
+
+[ARCHITECTURE](docs/ARCHITECTURE.md) · [INSTALLATION](docs/INSTALLATION.md) ·
+[VM-PREPARATION](docs/VM-PREPARATION.md) · [VMWARE](docs/VMWARE.md) · [QUICKSTART](docs/QUICKSTART.md) ·
+[CONFIGURATION](docs/CONFIGURATION.md) · [CASE-STRUCTURE](docs/CASE-STRUCTURE.md) · [EVENTS](docs/EVENTS.md) ·
+[CAPTURE](docs/CAPTURE.md) · [TLS-KEYLOG](docs/TLS-KEYLOG.md) · [THREAT-MODEL](docs/THREAT-MODEL.md) ·
+[LIMITATIONS](docs/LIMITATIONS.md) · [TROUBLESHOOTING](docs/TROUBLESHOOTING.md) · [TESTING](docs/TESTING.md) ·
+[ROADMAP](docs/ROADMAP.md)
+
+## Cosa è verificato automaticamente e cosa no
+
+| Aspetto | Verifica |
+|---|---|
+| Baseline della VM (versioni, rete, agent, hash del bundle) | automatica, documentata dal rapporto di `vmware-setup` |
+| Identità della VM (UUID), schede di rete, snapshot ripristinato | automatica |
+| Cattura attiva sull'interfaccia giusta, pacchetti in crescita | automatica |
+| Key log TLS non vuoto | automatica (non dice *quali* sessioni siano decifrabili) |
+| Integrità di ogni file dopo il trasferimento (SHA-256 ×2), catene di eventi | automatica |
+| Visibilità a schermo di Wireshark e Firefox | **operatore** |
+| Pertinenza e completezza di navigazione e screenshot | **operatore** |
+| Decifrabilità effettiva del traffico | **operatore**, in analisi |
+| Esattezza dell'ora dell'host rispetto a una fonte attendibile | **operatore**; l'offset host↔guest è misurato |
+
+## Licenza
+
+Apache License 2.0 ([LICENSE](LICENSE)). Contributi: [CONTRIBUTING.md](CONTRIBUTING.md).
+Sicurezza: [SECURITY.md](SECURITY.md).

@@ -1,0 +1,15 @@
+# Configurazione minima per provare il workflow completo senza VM:
+#   webcquisition -c examples/dry-run.yaml acquire CASE-DEMO-001 --output ./out/CASE-DEMO-001 --dry-run --auto-stop 3
+hypervisor:
+  provider: fake
+  vm_name: fake-vm
+  snapshot: clean
+  expected_nics: {"1": nat, "2": hostonly}
+agent:
+  expected_agent_id: fake-agent
+  poll_interval_s: 0.2
+capture:
+  verify_timeout_s: 5
+case:
+  output_directory: "./out"
+  operator: "Operatore di prova"

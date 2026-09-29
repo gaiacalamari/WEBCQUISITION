@@ -1,0 +1,77 @@
+# WEBCQUISITION - configurazione di esempio (host controller, VMware)
+# Normalmente NON va scritta a mano: "webcquisition vmware-setup" la genera per la VM preparata.
+# Copiare in un percorso proprio, adattare e passare con:  webcquisition -c <file> ...
+# Le chiavi sconosciute sono un ERRORE. La configurazione effettiva e il suo SHA-256
+# vengono registrati in ogni caso (metadata/config-snapshot.yaml, acquisition.json).
+
+hypervisor:
+  provider: vmware                # vmware (Workstation Pro / Fusion) | fake (solo test)
+  vm_name: 'D:\VMs\Forensic Windows\Forensic Windows.vmx'   # percorso COMPLETO del file .vmx
+  vm_uuid: null                   # CONSIGLIATO: uuid.bios del .vmx (spazi ignorati). Blocca l'uso di altre VM.
+  snapshot: webcq-clean           # snapshot pulito da ripristinare PRIMA di ogni acquisizione
+  require_snapshot: true
+  start_mode: gui                 # gui: l'operatore vede la VM; headless solo per test
+  boot_timeout_s: 300
+  shutdown_timeout_s: 180
+  tools_timeout_s: 300            # attesa di VMware Tools (usato da check-env --live)
+  expected_nics:                  # CONSIGLIATO: ethernet0 -> "1", ethernet1 -> "2"
+    "1": nat                      #   NIC1: rete di acquisizione (catturata)
+    "2": hostonly                 #   NIC2: canale di controllo host<->agent (MAI catturata)
+  post_acquisition_snapshot: on_failure   # never | on_failure | always
+  executable: null                # percorso di vmrun se non trovato automaticamente
+  vmrun_host_type: ws             # ws (Workstation Pro) | fusion (macOS). Player NON supportato.
+
+agent:
+  url: "http://192.168.150.10:8765"         # IP della VM sulla rete host-only (VMnet1)
+  token_file: "C:\\WEBCQUISITION\\agent.token"  # generato con: webcquisition gen-token --out ...
+  expected_agent_id: forensic-windows-01    # deve coincidere con agent_id in agent.json nella VM
+  request_timeout_s: 30
+  ready_timeout_s: 300
+  poll_interval_s: 5
+  unreachable_threshold: 3
+  max_clock_offset_s: 2.0
+
+capture:
+  engine: dumpcap                 # dumpcap (consigliato) | tshark
+  mode: dual                      # dual: dumpcap (reperto) + GUI Wireshark (vista operatore) | headless
+  interface: WEBCQ-Acquisizione   # nome dato da vmware-setup alla NIC1 | auto | \Device\NPF_{GUID} | GUID
+  ring_filesize_mb: 512           # rotazione per dimensione, nessun file viene mai eliminato
+  capture_filter: ""              # vuoto = tutto (consigliato ai fini forensi)
+  snaplen: 0                      # 0 = pacchetti interi
+  verify_timeout_s: 30
+  require_traffic: true
+  stall_warning_s: 300
+  min_free_disk_mb: 2048
+
+tls:
+  enabled: true
+  required: true                  # key log vuoto a fine sessione => errore (esito INCOMPLETE)
+
+browser:
+  browser: firefox
+  dedicated_profile: true
+  start_url: "https://time.is"    # pagina iniziale: ora di riferimento visibile negli screenshot
+  disable_doh: true               # DNS in chiaro nel PCAP
+  disable_http3: true             # evita QUIC (vedi docs/TLS-KEYLOG.md)
+  disable_ech: true
+  extra_prefs: {}
+
+screenshot:
+  hotkey_enabled: true
+  hotkey: "ctrl+alt+s"
+  control_panel: true
+
+case:
+  output_directory: "D:\\Cases"
+  operator: null                  # nome dell'operatore (facoltativo, o --operator)
+  organization: null
+
+finalize:
+  order: browser_first            # browser_first (consigliato) | capture_first
+  graceful_timeout_s: 30
+  block_guest_shutdown: true      # spegnere Windows nella VM = fine acquisizione (attende la copia)
+  recover_on_vm_loss: true        # VM spenta prima della copia: riavvio SENZA snapshot e recupero
+
+export:
+  retries: 3
+  make_readonly: true

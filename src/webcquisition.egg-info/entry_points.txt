@@ -1,0 +1,3 @@
+[console_scripts]
+webcquisition = webcquisition.cli:main
+webcquisition-agent = webcquisition_agent.__main__:main
