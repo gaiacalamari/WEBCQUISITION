@@ -2,7 +2,7 @@
 
 **Acquisizione forense automatizzata di attività web, in una VM Windows su VMware Workstation Pro.**
 
-WEBCQUISITION automatizza tutte le operazioni *meccaniche* di un'acquisizione web e lascia all'operatore
+WEBCQUISITION automatizza tutte le operazioni *manuali* di un'acquisizione web e lascia all'operatore
 solo quelle *investigative*: la navigazione e la scelta di cosa documentare.
 
 Per ogni acquisizione, WEBCQUISITION:
