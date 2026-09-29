@@ -1,7 +1,6 @@
 # Contribuire a WEBCQUISITION
 
-Grazie per l'interesse. Il progetto tratta materiale che può avere valore probatorio: le modifiche
-vengono valutate prima di tutto per il loro effetto su **integrità, tracciabilità e ripetibilità**.
+Grazie per l'interesse. Il progetto tratta materiale che può avere valore probatorio.
 
 ## Ambiente di sviluppo
 
