@@ -388,5 +388,5 @@ Codici di uscita: `0` COMPLETED, `2` INCOMPLETE, `3` FAILED, `64` errore d'uso o
 
 ## Licenza e contributi
 
-Rilasciato sotto **Apache License 2.0** ([LICENSE](LICENSE), [NOTICE](NOTICE)). Contributi benvenuti:
+Rilasciato sotto **Apache License 2.0** ([LICENSE](LICENSE)). Contributi benvenuti:
 [CONTRIBUTING.md](CONTRIBUTING.md).
