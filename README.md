@@ -42,7 +42,7 @@ HOST (Windows)                               VM Windows (VMware Workstation Pro)
 ┌──────────────────────────┐  VMnet1 host-only ┌──────────────────────────────────────────┐
 │ webcquisition            │ ◄──────────────► │ agent (sessione dell'operatore)           │
 │  • vmrun: snapshot, VM   │  HTTP + token     │  • Desktop\<CASO>\                        │
-│  • orchestrazione, stati │  (mai catturata)  │  • dumpcap ─► network\*.pcapng (REPERTO)  │
+│  • gestione, stati       │  (mai catturata)  │  • dumpcap ─► network\*.pcapng (REPERTO)  │
 │  • copia + SHA-256       │                   │  • Wireshark (vista per l'operatore)      │
 │  • report, verify        │                   │  • Firefox su time.is + SSLKEYLOGFILE     │
 └──────────────────────────┘                   │  • pannello e hotkey per gli screenshot   │
