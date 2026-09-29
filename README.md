@@ -114,9 +114,7 @@ Da fare una sola volta, dentro la VM.
    net user Administrator /active:yes
    net user Administrator <password>
    ```
-7. Riduci il rumore di fondo: OneDrive, app in background, sincronizzazioni. Quello che resta attivo
-   comparirà nel PCAP.
-8. **Spegni** la VM (non sospenderla).
+7. **Spegni** la VM (non sospenderla).
 
 > **Consiglio.** Se la VM ha una lunga storia di snapshot, cloni collegati o esperimenti, crea un
 > **clone completo** pulito: VM → *Manage* → *Clone* → *Create a full clone*. 
