@@ -38,16 +38,13 @@ Per ogni acquisizione, WEBCQUISITION:
 ## Come funziona
 
 ```
-HOST (Windows)                               VM Windows (VMware Workstation Pro)
-┌──────────────────────────┐  VMnet1 host-only ┌──────────────────────────────────────────┐
-│ webcquisition            │ ◄──────────────► │ agent (sessione dell'operatore)           │
-│  • vmrun: snapshot, VM   │  HTTP + token     │  • Desktop\<CASO>\                        │
-│  • gestione, stati       │  (mai catturata)  │  • dumpcap ─► network\*.pcapng (REPERTO)  │
-│  • copia + SHA-256       │                   │  • Wireshark (vista per l'operatore)      │
-│  • report, verify        │                   │  • Firefox su time.is + SSLKEYLOGFILE     │
-└──────────────────────────┘                   │  • pannello e hotkey per gli screenshot   │
-                                   VMnet8 NAT ─►│  NIC di acquisizione (catturata)          │
-                                               └──────────────────────────────────────────┘
+  HOST                                  VM Windows
+  webcquisition  ---- VMnet1 (host-only) ----  agent
+  (vmrun, copia,      HTTP + token,            dumpcap, Wireshark,
+   hash, report)      non catturato            Firefox, screenshot
+                                               |
+                                               +-- VMnet8 (NAT) --> internet
+                                                   questa è l'unica scheda catturata
 ```
 
 - La VM ha **due schede di rete**. **NIC1 (NAT)** serve alla navigazione ed è l'unica catturata.
