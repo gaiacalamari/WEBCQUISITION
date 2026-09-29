@@ -195,9 +195,6 @@ La password di Administrator viene chiesta a terminale e non viene mai scritta s
 | `webcquisition.yaml.setup-<data>.json` | rapporto di preparazione: versioni, schede, MAC, indirizzi, hash del bundle installato, avvisi |
 | `webcquisition.yaml.setup-<data>.events.jsonl` | log eventi della preparazione con catena di hash |
 
-Conserva rapporto e log con la documentazione del laboratorio: descrivono la **baseline** da cui
-partono tutte le acquisizioni.
-
 ---
 
 ## Passo 4 – Prova completa (`check-env --live`)
