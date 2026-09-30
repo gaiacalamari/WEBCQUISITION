@@ -165,7 +165,7 @@ webcquisition vmware-setup --vmx "D:\VM\WIN11_WEBCQ\WIN11_WEBCQ.vmx" ^
 
 La password di Administrator viene chiesta a terminale e non viene mai scritta su disco né nei log.
 
-**Cosa succede** (5–10 minuti):
+**Cosa fa** (5–10 minuti):
 
 1. Controlli preliminari, correzione delle schede di rete, rilevamento della rete host-only.
 2. Avvio della VM e attesa di VMware Tools.
