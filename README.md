@@ -363,7 +363,7 @@ Codici di uscita: `0` COMPLETED, `2` INCOMPLETE, `3` FAILED, `64` errore d'uso o
 
 ### Sicurezza e buone pratiche
 
-- `agent.token` e `tls\sslkeylog.log` sono **segreti**: proteggerli come il resto del reperto.
+- `agent.token` e `tls\sslkeylog.log` sono **parte dei documenti del caso**: proteggerli come il resto dei dati.
 - Tenere la cartella dei casi **fuori** dalla cartella del programma e non versionarla mai.
 - Il key log permette di decifrare tutto il traffico TLS della sessione, inclusi eventuali
   accessi fatti con credenziali: valutarne la gestione caso per caso.
