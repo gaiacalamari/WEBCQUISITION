@@ -19,22 +19,6 @@ Per ogni acquisizione, WEBCQUISITION:
 
 ---
 
-## Indice
-
-1. [Come funziona](#come-funziona)
-2. [Requisiti](#requisiti)
-3. [Passo 1 – Preparare la VM Windows](#passo-1--preparare-la-vm-windows)
-4. [Passo 2 – Installare WEBCQUISITION sull'host](#passo-2--installare-webcquisition-sullhost)
-5. [Passo 3 – Preparazione automatica della VM](#passo-3--preparazione-automatica-della-vm-vmware-setup)
-6. [Passo 4 – Prova completa](#passo-4--prova-completa-check-env---live)
-7. [Passo 5 – Acquisizione](#passo-5--acquisizione)
-8. [Passo 6 – Risultato, verifica e analisi](#passo-6--risultato-verifica-e-analisi)
-9. [Problemi frequenti](#problemi-frequenti)
-10. [Aggiornamenti](#aggiornare-webcquisition-o-la-vm)
-11. [Riferimenti](#riferimenti)
-
----
-
 ## Come funziona
 
 ```
